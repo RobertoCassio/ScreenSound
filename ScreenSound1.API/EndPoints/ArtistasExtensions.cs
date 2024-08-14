@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using ScreenSound.API.Requests;
 using ScreenSound.API.Response;
 using ScreenSound.BD;
@@ -60,17 +61,36 @@ namespace ScreenSound.API.NovaPasta2
                 var artistToUpdate = dal.RecuperarPor(a => a.Id == artistaRequestEdit.Id);
                 if (artistToUpdate is not null)
                 {
+                    var (isValid, errorMessage) = ArtistValidation(artistaRequestEdit);
+                    if (!isValid)
+                    {
+                        return Results.BadRequest(errorMessage);
+                    }
+
                     artistToUpdate.Nome = artistaRequestEdit.Nome;
                     artistToUpdate.Bio = artistaRequestEdit.Bio;
-
                     dal.Update(artistToUpdate);
                     return Results.Ok();
+                    
                 }
                 else
                 {
                     return Results.NotFound();
                 }
             });
+
+            static (bool, string) ArtistValidation (ArtistaRequestEdit request)
+            {
+                if (string.IsNullOrEmpty(request.Nome))
+                {
+                    return (false, "O campo 'Nome' não pode ser nulo.");
+                }
+                if (string.IsNullOrEmpty(request.Bio))
+                {
+                    return (false, "O campo 'Bio' não pode ser nulo.");
+                }
+                return (true, string.Empty);
+            };
         }
     }
 }

@@ -53,6 +53,11 @@ namespace ScreenSound.API.EndPoints
                 var foundGenero = dal.RecuperarPor(g=>g.Id ==  generoRequestEdit.Id);
                 if (foundGenero is not null)
                 {
+                    var (isValid, errorMessage) = GeneroValidation(generoRequestEdit);
+                    if (!isValid)
+                    {
+                        return Results.BadRequest(errorMessage);
+                    }
                     foundGenero.Descricao = generoRequestEdit.Descricao;
                     foundGenero.Nome = generoRequestEdit.Nome; 
 
@@ -72,6 +77,14 @@ namespace ScreenSound.API.EndPoints
                  return Results.NotFound();
              });
         }
-        
+        static (bool, string) GeneroValidation(GeneroRequestEdit request)
+        {
+            if (string.IsNullOrEmpty(request.Nome))
+            {
+                return (false, "O campo 'Nome' não pode ser nulo.");
+            }
+            return (true, string.Empty);
+        }
+
     }
 }
